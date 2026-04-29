@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Register - ASTU Clearance</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", Arial;
+  background: linear-gradient(135deg,#1d4ed8,#6366f1,#a855f7);
+}
+
+.bgOverlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(25px);
+  background: rgba(0,0,0,0.15);
+}
+
+.card {
+  position: relative;
+  width: 380px;
+  padding: 35px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+  text-align: center;
+  z-index: 2;
+}
+
+.title {
+  color: #1e293b;
+  margin-bottom: 5px;
+  font-weight: 800;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  outline: none;
+  font-size: 14px;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(to right,#2563eb,#7c3aed);
+  box-shadow: 0 10px 20px rgba(37,99,235,0.3);
+}
+
+.link {
+  margin-top: 15px;
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="bgOverlay"></div>
+
+<div class="card">
+  <h2 class="title">🎓 ASTU Student Registration</h2>
+  <p class="subtitle">Create your clearance system account</p>
+
+  <input id="name" class="input" placeholder="Full Name" />
+  <input id="email" class="input" placeholder="Email Address" />
+  <input id="password" type="password" class="input" placeholder="Password" />
+
+  <button class="btn" onclick="register()">Create Account</button>
+
+  <p class="link" onclick="goToLogin()">Already registered? Login here</p>
+</div>
+
+<script>
+async function register() {
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("http://localhost:8081/web-project/web-project-php/backend/index.php?action=register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name,
+      email,
+      password,
+      role: "student"
+    })
+  });
+
+  const data = await res.json();
+
+  alert(data.message);
+
+  if (data.status === "success") {
+    window.location.href = "login.html";
+  }
+}
+
+function goToLogin() {
+  window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>

@@ -63,5 +63,152 @@
 </div>
 
 
+
+<script>
+const user = JSON.parse(localStorage.getItem("user")) || {};
+
+if (!user.id) {
+  window.location.href = "../login.html";
+}
+
+document.getElementById("profile").innerText = "👤 " + user.name;
+
+let tab = "pending";
+let requests = [];
+let selectedApproval = null;
+
+// fetch
+function fetchRequests() {
+  fetch(`http://localhost:8081/webb-project/web-project-php/backend/index.php?action=dept_requests&department_id=${user.department_id}`)
+    .then(res => res.json())
+    .then(data => {
+      requests = data || [];
+      render();
+    });
+}
+
+fetchRequests();
+
+// tab switch
+function setTab(t) {
+  tab = t;
+
+  document.getElementById("pendingBtn").className =
+    t === "pending" ? "activeBtn" : "menuBtn";
+
+  document.getElementById("reviewedBtn").className =
+    t === "reviewed" ? "activeBtn" : "menuBtn";
+
+  document.getElementById("title").innerText =
+    t === "pending" ? "Pending Requests" : "Reviewed Requests";
+
+  render();
+}
+
+// render
+function render() {
+
+  let filtered =
+    tab === "pending"
+      ? requests.filter(r => r.status === "pending")
+      : requests.filter(r => r.status !== "pending");
+
+  const container = document.getElementById("content");
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<p class="empty">No requests found</p>`;
+    return;
+  }
+
+  let html = "";
+
+  filtered.forEach(r => {
+
+    html += `
+      <div class="card">
+
+        <div class="topRow">
+          <div>
+            <h3 class="student">${r.student_name}</h3>
+            <p class="meta">Request ID: #${r.request_id}</p>
+          </div>
+
+          <span class="badge" style="background:${
+            r.status === "approved" ? "#16a34a" :
+            r.status === "rejected" ? "#dc2626" :
+            "#f59e0b"
+          }">
+            ${r.status.toUpperCase()}
+          </span>
+        </div>
+
+        ${r.status === "pending" ? `
+        <div class="actions">
+          <button class="approve" onclick="approve(${r.approval_id})">✔ Approve</button>
+          <button class="reject" onclick="openModal(${r.approval_id})">✖ Reject</button>
+        </div>
+        ` : ""}
+
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// approve
+function approve(id) {
+  updateStatus(id, "approved");
+}
+
+// modal
+function openModal(id) {
+  selectedApproval = id;
+  document.getElementById("modal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+  document.getElementById("comment").value = "";
+}
+
+// submit reject
+function submitReject() {
+  const comment = document.getElementById("comment").value;
+
+  if (!comment.trim()) return;
+
+  updateStatus(selectedApproval, "rejected", comment);
+
+  closeModal();
+}
+
+// update backend
+function updateStatus(id, status, comment = null) {
+
+  fetch("http://localhost:8081/webb-project/web-project-php/backend/index.php?action=dept_update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      approval_id: id,
+      status,
+      comment
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === "success") {
+      fetchRequests();
+    }
+  });
+}
+
+// logout
+function logout() {
+  localStorage.clear();
+  window.location.href = "../login.html";
+}
+</script>
+
 </body>
 </html>

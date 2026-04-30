@@ -38,7 +38,7 @@ public static function getRequests($conn,$id){
 
         $request_id = $r['id'];
 
-        // ✅ CORRECT PLACE (INSIDE LOOP)
+        
         $dept_sql = "SELECT d.name, a.status, a.comment
                      FROM approvals a
                      JOIN departments d ON a.department_id = d.id

@@ -23,7 +23,7 @@ class AdminController {
 
   public static function createUser($conn,$data){
 
-    // ✅ FIX: prevent NULL crash
+
     if(!$data){
         echo json_encode([
             "status"=>"error",

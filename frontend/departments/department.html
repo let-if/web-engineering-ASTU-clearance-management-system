@@ -8,7 +8,41 @@
 </head>
 
 <body>
+   
+    <div class="wrapper">
 
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <div class="brand">
+      <h2 class="logo">ASTU Dept</h2>
+      <p class="subLogo">Clearance Panel</p>
+    </div>
+
+    <div class="profile" id="profile"></div>
+
+    <button id="pendingBtn" class="activeBtn" onclick="setTab('pending')">
+       Pending Requests
+    </button>
+
+    <button id="reviewedBtn" class="menuBtn" onclick="setTab('reviewed')">
+       Reviewed Requests
+    </button>
+
+    <button class="logout" onclick="logout()"> Logout</button>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <h2 class="pageTitle" id="title">Pending Requests</h2>
+    <p class="pageSub">Manage student clearance approvals</p>
+
+    <div id="content"></div>
+
+  </div>
+</div>
 
 
 </body>

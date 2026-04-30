@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Departments</title>
+
+<style>
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: Arial;
+  background: #ffffff;
+}
+
+h2 {
+  color: #1e293b;
+  margin-bottom: 20px;
+}
+
+/* FORM */
+.form {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  outline: none;
+}
+
+button {
+  padding: 10px 14px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* CARD */
+.card {
+  padding: 10px;
+  background: #f8fafc;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #eef2f7;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Manage Departments</h2>
+
+<!-- FORM -->
+<div class="form">
+  <input id="deptName" placeholder="Department name" />
+  <button onclick="addDepartment()">Add</button>
+</div>
+
+<!-- LIST -->
+<div id="list"></div>
+
+<script>
+
+let departments = [];
+
+// FETCH
+function fetchDepartments() {
+  fetch("http://localhost:8081/web-project/web-project-php/backend/index.php?action=departments")
+    .then(res => res.json())
+    .then(data => {
+      departments = data || [];
+      render();
+    });
+}
+
+fetchDepartments();
+
+// ADD
+async function addDepartment() {
+
+  const name = document.getElementById("deptName").value;
+
+  if (!name.trim()) return;
+
+  await fetch("http://localhost:8081/web-project/web-project-php/backend/index.php?action=add_department", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name })
+  });
+
+  document.getElementById("deptName").value = "";
+
+  fetchDepartments();
+}
+
+// RENDER
+function render() {
+
+  const container = document.getElementById("list");
+
+  container.innerHTML = "";
+
+  departments.forEach(d => {
+    container.innerHTML += `
+      <div class="card">
+        ${d.name}
+      </div>
+    `;
+  });
+}
+
+</script>
+
+</body>
+</html>

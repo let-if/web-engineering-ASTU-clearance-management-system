@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial;
+  background: #f4f6fb;
+}
+
+/* WRAPPER */
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 270px;
+  background: linear-gradient(180deg,#0f172a,#111827);
+  color: #fff;
+  padding: 20px;
+  box-shadow: 2px 0 20px rgba(0,0,0,0.2);
+}
+
+.logo { margin: 0; font-weight: 800; }
+.subLogo { font-size: 12px; color: #94a3b8; }
+
+.userBox {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #cbd5e1;
+}
+
+.menuBtn {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  background: transparent;
+  border: 1px solid #334155;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.activeBtn {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  background: #2563eb;
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: left;
+}
+
+.logout {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background: #ef4444;
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  padding: 30px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 15px;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.formCard {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  outline: none;
+}
+
+button.primary {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(to right,#2563eb,#1d4ed8);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.listItem {
+  background: #fff;
+  padding: 14px;
+  margin: 8px 0;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.badge {
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <h2 class="logo">ASTU Admin</h2>
+    <p class="subLogo">Clearance Control Center</p>
+
+    <div class="userBox" id="userBox"></div>
+
+    <button class="menuBtn" id="btnDash" onclick="setActive('dashboard')">📊 Dashboard</button>
+    <button class="menuBtn" id="btnUsers" onclick="setActive('users')">👥 Users</button>
+    <button class="menuBtn" id="btnDept" onclick="setActive('departments')">🏢 Departments</button>
+    <button class="menuBtn" id="btnReq" onclick="setActive('requests')">📄 Requests</button>
+
+    <button class="logout" onclick="logout()">🚪 Logout</button>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="main"></div>
+
+</div>
+
+<script>
+
+const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+
+let active = "dashboard";
+let departments = [];
+let requests = [];
+let userForm = {
+  name:"",
+  email:"",
+  password:"",
+  role:"student",
+  department_id:""
+};
+
+document.getElementById("userBox").innerHTML =
+  "👤 " + (currentUser.name || "Admin");
+
+function setActive(tab){
+  active = tab;
+  render();
+}
+
+function logout(){
+  localStorage.clear();
+  window.location.href = "../login.html";
+}
+
+/* LOAD DATA */
+function loadDepartments(){
+  fetch("http://localhost:8081/webb-project/web-project-php/backend/index.php?action=admin_departments")
+    .then(r=>r.json())
+    .then(d=>departments=d);
+}
+
+function loadRequests(){
+  fetch("http://localhost:8081/webb-project/web-project-php/backend/index.php?action=admin_requests")
+    .then(r=>r.json())
+    .then(d=>requests=d);
+}
+
+/* CREATE DEPT */
+function createDept(){
+  const name = document.getElementById("deptName").value;
+
+  fetch("http://localhost:8081/webb-project/web-project-php/backend/index.php?action=admin_create_department",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({name})
+  }).then(()=>loadDepartments());
+}
+
+/* CREATE USER */
+function createUser(){
+  fetch("http://localhost:8081/webb-project/web-project-php/backend/index.php?action=admin_create_user",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(userForm)
+  }).then(()=>alert("User created"));
+}
+
+/* RENDER */
+function render(){
+
+  const main = document.getElementById("main");
+
+  /* DASHBOARD */
+  if(active==="dashboard"){
+    main.innerHTML = `
+      <h1>Welcome Admin 👋</h1>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Departments</h3>
+          <h2>${departments.length}</h2>
+        </div>
+
+        <div class="card">
+          <h3>Requests</h3>
+          <h2>${requests.length}</h2>
+        </div>
+      </div>
+    `;
+  }
+
+  /* USERS */
+  if(active==="users"){
+    main.innerHTML = `
+      <h2>Create User</h2>
+
+      <div class="formCard">
+        <input id="name" placeholder="Name">
+        <input id="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+
+        <select id="role">
+          <option>student</option>
+          <option>department</option>
+          <option>admin</option>
+        </select>
+
+        <button class="primary" onclick="createUser()">Create</button>
+      </div>
+    `;
+  }
+
+  /* DEPARTMENTS */
+  if(active==="departments"){
+    main.innerHTML = `
+      <h2>Departments</h2>
+
+      <div class="formCard">
+        <input id="deptName" placeholder="Department name">
+        <button class="primary" onclick="createDept()">Create</button>
+      </div>
+
+      ${departments.map(d=>`
+        <div class="listItem">🏢 ${d.name}</div>
+      `).join("")}
+    `;
+  }
+
+  /* REQUESTS */
+  if(active==="requests"){
+    main.innerHTML = `
+      <h2>Requests</h2>
+
+      ${requests.map(r=>`
+        <div class="listItem">
+          <div>
+            <b>${r.student_name}</b>
+            <p style="margin:0;font-size:12px">#${r.id}</p>
+          </div>
+
+          <span class="badge" style="background:
+            ${r.status==="approved"?"#16a34a":
+              r.status==="rejected"?"#dc2626":
+              "#f59e0b"}">
+            ${r.status}
+          </span>
+        </div>
+      `).join("")}
+    `;
+  }
+
+}
+
+/* INIT */
+loadDepartments();
+loadRequests();
+render();
+
+</script>
+
+</body>
+</html>
